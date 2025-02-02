@@ -5,6 +5,7 @@ const port = 8000
 const hostname = '127.0.0.1'
 import { dbConnect } from './db/index.js'
 import userRoutes from './routes/user.routes.js'
+import cookieParser from 'cookie-parser'
 
 
 
@@ -23,10 +24,11 @@ dbConnect().then(() => {
 app.use(express.json())
 app.use(express.urlencoded())
 app.use(express.static("public"))
+app.use(cookieParser())
+
 app.get('/', (req, res) => {
   res.send('Hello World!')
 })
-
 app.use('/api/v1/auth', userRoutes)
 
 
