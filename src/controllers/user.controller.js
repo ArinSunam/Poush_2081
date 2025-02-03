@@ -7,7 +7,6 @@ const generateAccessAndRefreshToken = async (userId) => {
     const accessToken = user.generateAccessToken()
     const refreshToken = user.generateRefreshToken()
 
-
     user.refresh_token = refreshToken
     user.save({ validateBeforeSave: false })
 
@@ -38,12 +37,12 @@ const userRegister = async (req, res) => {
     const createdUser = await User.findById(user._id).select("-password -refresh_token")
 
     if (!createdUser) {
-      res.status(500).json({
+      return res.status(500).json({
         message: "something went wrong"
       })
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "User registerd successful",
       data: createdUser
     })
@@ -103,6 +102,34 @@ const userLogin = async (req, res) => {
   }
 }
 
+const userLogout = async (req, res) => {
+  console.log(req.user)
+  await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        refresh_token: undefined
+      }
+    },
+    {
+      new: true
+    }
+  )
+
+  const options = {
+    httpOnly: true,
+    secure: true
+  }
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json({
+      message: "User LoggedOut Successfully"
+    })
+}
 
 
-export { userRegister, userLogin } 
+
+export { userRegister, userLogin, userLogout } 
