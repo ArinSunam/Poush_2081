@@ -130,6 +130,28 @@ const userLogout = async (req, res) => {
     })
 }
 
+const getUser = async (req, res) => {
+  try {
+    res.status(200).json({
+      data: req.user,
+      message: "User fetched Successfully"
+    })
+  } catch (error) {
+    console.log("Error while fetching user:", error.message)
+    res.status(500).json({ message: error.message })
+  }
+}
 
 
-export { userRegister, userLogin, userLogout } 
+const refreshAccessToken = () => {
+  //extract refresh token
+  //validate refresh token
+  //decode refresh token -- extract id
+  //find user 
+  // generate access token 
+  // set in cookie
+}
+
+
+
+export { userRegister, userLogin, userLogout, getUser } 
