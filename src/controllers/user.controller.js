@@ -1,4 +1,5 @@
 import { User } from "../model/user.model.js"
+import jwt from "jsonwebtoken"
 
 
 const generateAccessAndRefreshToken = async (userId) => {
@@ -7,7 +8,7 @@ const generateAccessAndRefreshToken = async (userId) => {
     const accessToken = user.generateAccessToken()
     const refreshToken = user.generateRefreshToken()
 
-    user.refresh_token = refreshToken
+    user.refreshToken = refreshToken
     user.save({ validateBeforeSave: false })
 
     return { accessToken, refreshToken }
@@ -143,15 +144,109 @@ const getUser = async (req, res) => {
 }
 
 
-const refreshAccessToken = () => {
+const refreshAccessToken = async (req, res) => {
   //extract refresh token
   //validate refresh token
   //decode refresh token -- extract id
   //find user 
   // generate access token 
   // set in cookie
+
+  try {
+    const fetchedRefToken = req.cookies?.refreshToken
+    console.log("fetch ref", fetchedRefToken)
+
+
+    if (!fetchedRefToken) {
+      return res.status(401).json({
+        message: "Unauthorized request"
+      })
+    }
+
+    const decodedToken = jwt.verify(fetchedRefToken, process.env.REFRESH_TOKEN_SECRET
+    )
+
+    const user = await User.findById(decodedToken?._id)
+    if (!user) {
+      return res.status(401).json({ message: "Invalid refresh token" })
+    }
+    console.log(user)
+    console.log('user ref', user.refreshToken)
+    if (fetchedRefToken !== user?.refreshToken) {
+      return res.status(401).json({
+        message: "Refresh token is expired"
+      })
+    }
+
+    const options = {
+      httpOnly: true,
+      secure: true
+    }
+
+    const { accessToken, refreshToken } = await generateAccessAndRefreshToken(user._id)
+    res
+      .status(200)
+      .cookie("accessToken", accessToken, options)
+      .cookie("refreshToken", refreshToken, options)
+      .json({
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        message: "Successfully generated access token"
+      })
+
+
+  } catch (error) {
+    console.log("error in access token generation", error)
+    res.status(500).json({
+      error: error
+    })
+  }
+}
+
+const updateUserDetails = async (req, res) => {
+  try {
+    const { fullname, email } = req.body
+
+    if (!fullname || !email) {
+      return res.status(400).json({
+        message: "All fields are required"
+      })
+    }
+
+    const user = await User.findByIdAndUpdate(
+      req.user?._id,
+      {
+        $set: {
+          fullname,
+          email
+        }
+      },
+      {
+        new: true
+      }
+    ).select("-password")
+
+    return res.status(200).json({
+      data: user,
+      message: "User updated successfully"
+    })
+  } catch (error) {
+    console.log("error in updating user", error)
+    return res.status(500).json(error)
+  }
 }
 
 
+const updatePassword = async (req, res) => {
 
-export { userRegister, userLogin, userLogout, getUser } 
+  //try catch ma rakhne
+  //req old and new password, confPass from user
+  //confirm old password
+  //validation
+  //fetch user  by id
+  //update password
+  //sent response
+}
+
+
+export { userRegister, userLogin, userLogout, getUser, refreshAccessToken, updateUserDetails } 

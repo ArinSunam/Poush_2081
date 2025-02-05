@@ -1,0 +1,12 @@
+1.Make separate function for refresh token and access token and implement them accordinly in the controllers
+
+2.Update the password
+3.Update profile picture
+4. make product schema
+    i.title
+    ii.description
+    iii.price
+    iv.category
+    v.image
+    vi.review
+5.research on mongoose enum

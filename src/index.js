@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import express from 'express'
 const app = express()
-const port = 8000
+const port = 5000
 const hostname = '127.0.0.1'
 import { dbConnect } from './db/index.js'
 import userRoutes from './routes/user.routes.js'
