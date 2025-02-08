@@ -5,6 +5,7 @@ const port = 5000
 const hostname = '127.0.0.1'
 import { dbConnect } from './db/index.js'
 import userRoutes from './routes/user.routes.js'
+import productRoutes from './routes/product.routes.js'
 import cookieParser from 'cookie-parser'
 
 
@@ -30,10 +31,4 @@ app.get('/', (req, res) => {
   res.send('Hello World!')
 })
 app.use('/api/v1/auth', userRoutes)
-
-
-
-
-
-
-
+app.use('/api/v1/product', productRoutes)
